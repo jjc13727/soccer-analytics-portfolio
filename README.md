@@ -6,7 +6,8 @@
  -Project 1: Match Event Data Analysis (StatsBomb Open Data)
  -Project 2: Player Performance Comparison
  -Project 3: Tactical Video and Data Analysis
- -Tactics Board App: Interactive soccer tactics board (desktop app) with historical formations/lineups and match replay — see `tactics-board-app/README.md`
+ -Tactics Board App: Interactive soccer tactics board (desktop app) with historical formations/lineups and match replay to a limited extent, with the use of paid API keys we can get more matches and data that go back years ago
+ 
 
  ## Tools and Skills
  -Soccer Match and Tactical Analysis
