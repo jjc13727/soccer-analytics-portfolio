@@ -1,0 +1,491 @@
+:root {
+  color-scheme: dark;
+  --bg: #12181f;
+  --panel: #1a222c;
+  --panel-alt: #212b37;
+  --border: #2c3947;
+  --text: #e7edf3;
+  --text-muted: #8fa0b3;
+  --accent: #34d399;
+  --home: #e11d3f;
+  --away: #2f6fed;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+select,
+input {
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.app-header h1 {
+  font-size: 1.1rem;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.app-subtitle {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.app-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 300px 1fr 280px;
+  min-height: 0;
+}
+
+.left-panel,
+.right-panel {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.right-panel {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+.pitch-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  min-width: 0;
+  min-height: 0;
+  background: radial-gradient(circle at 50% 40%, #10331f, #0c1a12 75%);
+}
+
+/* --- Pitch & tokens ---------------------------------------------------- */
+
+.pitch {
+  position: relative;
+  width: min(100%, 148vh);
+  aspect-ratio: 105 / 68;
+  background: repeating-linear-gradient(90deg, #1c5c33 0 5%, #1a5730 5% 10%);
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 20px 60px rgba(0, 0, 0, 0.5);
+  touch-action: none;
+  user-select: none;
+  cursor: default;
+}
+
+.pitch-add-mode {
+  cursor: crosshair;
+  outline: 2px dashed var(--accent);
+  outline-offset: 2px;
+}
+
+.pitch-markings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.pitch-line {
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 0.3;
+}
+
+.pitch-dot {
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.player-token {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.player-token:active {
+  cursor: grabbing;
+  z-index: 20;
+}
+
+/* Home labels sit below their circle, away labels above: when a defender and an
+   attacker from opposite sides occupy nearly the same spot (very common near the
+   box) the two name tags land on opposite sides of the cluster instead of stacking
+   on top of each other. */
+.player-token.away {
+  flex-direction: column-reverse;
+}
+
+.token-circle {
+  width: clamp(22px, 3.6vw, 34px);
+  height: clamp(22px, 3.6vw, 34px);
+  border-radius: 50%;
+  background: var(--team-color, #888);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: clamp(0.6rem, 1.3vw, 0.85rem);
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.player-token.away .token-circle {
+  border-style: solid;
+}
+
+.player-token.is-sub .token-circle {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.token-name {
+  font-size: clamp(0.55rem, 1.1vw, 0.7rem);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.token-name-input {
+  width: 90px;
+  font-size: 0.7rem;
+  padding: 1px 3px;
+}
+
+/* --- Left panel ---------------------------------------------------------- */
+
+.tab-row {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tab {
+  flex: 1;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 4px;
+  padding: 0.4rem;
+  cursor: pointer;
+}
+
+.tab.active {
+  color: var(--text);
+  border-color: var(--accent);
+  background: #1e3a30;
+}
+
+.match-browser,
+.toolbar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.match-browser label,
+.toolbar-section label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.match-browser select,
+.toolbar-section select,
+.toolbar-section input {
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.35rem;
+}
+
+button {
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #06251b;
+  font-weight: 600;
+}
+
+.icon-btn {
+  padding: 0.2rem 0.4rem;
+}
+
+details {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.saved-boards {
+  list-style: none;
+  padding: 0;
+  margin: 0.3rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.saved-boards li {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.saved-boards li button:first-child {
+  flex: 1;
+  text-align: left;
+}
+
+.panel-divider {
+  border-top: 1px solid var(--border);
+}
+
+.panel-muted {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 0.5rem 0;
+}
+
+.panel-error {
+  color: #f87171;
+  font-size: 0.8rem;
+}
+
+/* --- Replay --------------------------------------------------------------- */
+
+.replay-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.replay-buttons {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.replay-buttons button {
+  flex: 1;
+}
+
+.replay-slider {
+  width: 100%;
+}
+
+.replay-current {
+  font-size: 0.8rem;
+  min-height: 1.2em;
+}
+
+.event-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-log li {
+  font-size: 0.72rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.event-log li:hover {
+  background: var(--panel-alt);
+}
+
+.event-log li.event-current {
+  background: #1e3a30;
+  color: var(--text);
+}
+
+.event-minute {
+  font-weight: 700;
+  color: var(--accent);
+  margin-right: 0.3rem;
+}
+
+/* --- Right panel / stats --------------------------------------------------- */
+
+.stats-sidebar h3 {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0.5rem 0 0.3rem;
+}
+
+.scoreline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.team-header.right {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.team-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.team-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
+}
+
+.team-formation {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.score {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.match-meta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.stats-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  padding: 0.2rem 0.3rem;
+}
+
+.stats-table td {
+  padding: 0.2rem 0.3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.stats-table tr.home td:first-child {
+  border-left: 3px solid var(--home);
+}
+
+.stats-table tr.away td:first-child {
+  border-left: 3px solid var(--away);
+}
+
+@media (max-width: 900px) {
+  .app-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    overflow-y: auto;
+  }
+  .left-panel,
+  .right-panel {
+    border: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
