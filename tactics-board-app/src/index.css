@@ -1,15 +1,17 @@
 :root {
   color-scheme: dark;
-  --bg: #12181f;
-  --panel: #1a222c;
-  --panel-alt: #212b37;
+  --bg: #0e1319;
+  --panel: #171f28;
+  --panel-alt: #1f2933;
   --border: #2c3947;
-  --text: #e7edf3;
-  --text-muted: #8fa0b3;
+  --text: #edf2f7;
+  --text-muted: #8697a8;
   --accent: #34d399;
+  --brand: #7c6bf0;
   --home: #e11d3f;
   --away: #2f6fed;
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius: 8px;
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
 }
 
 * {
@@ -180,6 +182,12 @@ input {
   outline-offset: 2px;
 }
 
+.player-token.is-selected .token-circle {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(124, 107, 240, 0.35), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
 .token-name {
   font-size: clamp(0.55rem, 1.1vw, 0.7rem);
   background: rgba(0, 0, 0, 0.55);
@@ -209,15 +217,18 @@ input {
   background: var(--panel-alt);
   border: 1px solid var(--border);
   color: var(--text-muted);
-  border-radius: 4px;
-  padding: 0.4rem;
+  border-radius: 6px;
+  padding: 0.45rem 0.3rem;
   cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: border-color 0.15s, color 0.15s;
 }
 
 .tab.active {
   color: var(--text);
-  border-color: var(--accent);
-  background: #1e3a30;
+  border-color: var(--brand);
+  background: #241f42;
 }
 
 .match-browser,
@@ -418,11 +429,16 @@ details summary {
   text-align: right;
 }
 
-.team-dot {
-  width: 10px;
-  height: 10px;
+.team-badge {
   border-radius: 50%;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.02em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .team-name {
@@ -475,6 +491,204 @@ details summary {
 
 .stats-table tr.away td:first-child {
   border-left: 3px solid var(--away);
+}
+
+/* --- Club squads (current season) tab --------------------------------------- */
+
+.club-squads-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.club-squads-note {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+}
+
+.club-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+}
+
+.club-picker.home {
+  border-left: 3px solid var(--home);
+}
+
+.club-picker.away {
+  border-left: 3px solid var(--away);
+}
+
+.club-picker-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.club-picker label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.club-picker select {
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.35rem;
+}
+
+.bench-list {
+  margin-top: 0.2rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.4rem;
+}
+
+.bench-list-title {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+  line-height: 1.3;
+}
+
+.bench-player {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  font-size: 0.72rem;
+  border-radius: 4px;
+}
+
+.bench-player:hover {
+  background: var(--panel-alt);
+  border-color: transparent;
+}
+
+/* --- Full squads panel ----------------------------------------------------- */
+
+.squad-panel {
+  border-top: 1px solid var(--border);
+  padding-top: 0.5rem;
+}
+
+.squad-panel summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+}
+
+.squad-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.team-squad {
+  min-width: 0;
+}
+
+.team-squad-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.team-squad.home .team-squad-header {
+  border-bottom-color: var(--home);
+}
+
+.team-squad.away .team-squad-header {
+  border-bottom-color: var(--away);
+}
+
+.team-squad-header .team-name {
+  font-size: 0.78rem;
+  max-width: none;
+}
+
+.team-manager {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.team-squad h4 {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0.15rem;
+}
+
+.squad-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.squad-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  padding: 1px 0;
+  min-width: 0;
+}
+
+.squad-list-muted li {
+  color: var(--text-muted);
+}
+
+.squad-number {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  width: 1.4em;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.squad-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.squad-sub-minute {
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
 }
 
 @media (max-width: 900px) {

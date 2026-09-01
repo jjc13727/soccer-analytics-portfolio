@@ -1,7 +1,9 @@
-import type { DatasetIndex, NormalizedMatch } from "./types";
+import type { ClubSquad, ClubSquadIndex, DatasetIndex, NormalizedMatch } from "./types";
 
 const seasonCache = new Map<string, Promise<NormalizedMatch[]>>();
 let indexCache: Promise<DatasetIndex> | null = null;
+let squadIndexCache: Promise<ClubSquadIndex> | null = null;
+const squadCache = new Map<string, Promise<ClubSquad>>();
 
 // Vite serves /public at the site root, and BASE_URL handles being hosted under a
 // sub-path (e.g. GitHub Pages) or loaded from file:// inside a packaged Electron app.
@@ -40,4 +42,27 @@ export async function loadMatch(
 ): Promise<NormalizedMatch | undefined> {
   const season = await loadSeason(competitionId, seasonId);
   return season.find((m) => m.match_id === matchId);
+}
+
+export function loadSquadIndex(): Promise<ClubSquadIndex> {
+  if (!squadIndexCache) {
+    squadIndexCache = fetch(dataUrl("squads/index.json")).then((r) => {
+      if (!r.ok) throw new Error(`Failed to load club squad index (${r.status})`);
+      return r.json();
+    });
+  }
+  return squadIndexCache;
+}
+
+export function loadSquad(slug: string): Promise<ClubSquad> {
+  if (!squadCache.has(slug)) {
+    squadCache.set(
+      slug,
+      fetch(dataUrl(`squads/${slug}.json`)).then((r) => {
+        if (!r.ok) throw new Error(`Failed to load squad "${slug}" (${r.status})`);
+        return r.json();
+      })
+    );
+  }
+  return squadCache.get(slug)!;
 }

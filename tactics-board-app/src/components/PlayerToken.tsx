@@ -11,8 +11,11 @@ export default function PlayerToken({ token, onPointerDown }: Props) {
   const meta = useBoardStore((s) => (token.side === "home" ? s.homeMeta : s.awayMeta));
   const removeToken = useBoardStore((s) => s.removeToken);
   const renameToken = useBoardStore((s) => s.renameToken);
+  const selectedTokenId = useBoardStore((s) => s.selectedTokenId);
+  const selectToken = useBoardStore((s) => s.selectToken);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(token.name);
+  const isSelected = selectedTokenId === token.id;
 
   function commitRename() {
     setEditing(false);
@@ -21,18 +24,19 @@ export default function PlayerToken({ token, onPointerDown }: Props) {
 
   return (
     <div
-      className={`player-token ${token.side}${token.isSub ? " is-sub" : ""}`}
+      className={`player-token ${token.side}${token.isSub ? " is-sub" : ""}${isSelected ? " is-selected" : ""}`}
       style={{ left: `${token.x}%`, top: `${token.y}%`, ["--team-color" as string]: meta.color }}
       onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId);
+        e.preventDefault();
         onPointerDown();
       }}
+      onClick={() => selectToken(isSelected ? null : token.id)}
       onDoubleClick={() => setEditing(true)}
       onContextMenu={(e) => {
         e.preventDefault();
         removeToken(token.id);
       }}
-      title={`${token.name}${token.positionName ? ` — ${token.positionName}` : ""} (right-click to remove, double-click to rename)`}
+      title={`${token.name}${token.positionName ? ` — ${token.positionName}` : ""} (click to select, right-click to remove, double-click to rename)`}
     >
       <div className="token-circle">{token.jerseyNumber ?? "?"}</div>
       {editing ? (

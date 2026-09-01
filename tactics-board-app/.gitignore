@@ -12,6 +12,8 @@ dist
 dist-ssr
 release
 *.local
+__pycache__/
+*.pyc
 
 # Editor directories and files
 .vscode/*

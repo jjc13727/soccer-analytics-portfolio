@@ -5,6 +5,14 @@ drag players around a pitch, build custom formations and lineups, browse
 real historical matches from the top 5 European leagues and load their
 actual formation/lineup onto the board, then replay the match event-by-event
 (goals, cards, subs) with a live scoreline and per-player G/A/card stats.
+A separate **Club Squads** tab loads a club's real current-season squad
+(shirt numbers, positions, manager) so you can set up today's teams, not
+just historical ones.
+
+Player names are shown the way a stat sheet or FotMob would show them —
+e.g. "L. Messi" in lists and the stats table, just "Messi" on the pitch
+token — built from StatsBomb's "known as" name where available, not the
+full legal name.
 
 Runs as a desktop app (Windows/Mac/Linux via Electron) or in any browser —
 same codebase, and it's structured so a Capacitor-based mobile build can
@@ -21,12 +29,17 @@ npm run electron:dev     # desktop app, hot-reloading
 ## What's here
 
 - `src/` — the React/TypeScript app (pitch, drag-and-drop tokens, formation
-  builder, match browser, replay controls, stats sidebar).
+  builder, match browser, club squads, replay controls, stats sidebar).
 - `electron/` — the thin Electron shell (`main.cjs` opens a window pointing
   at the Vite dev server in development, or the built `dist/` in production).
-- `data-pipeline/fetch_statsbomb.py` — fetches and normalizes real match data.
-- `public/data/` — the normalized dataset the app reads at runtime
-  (`index.json` + one JSON file per competition/season).
+- `data-pipeline/fetch_statsbomb.py` — fetches and normalizes real historical
+  match data (formations, lineups, events, managers).
+- `data-pipeline/fetch_current_squads.py` — fetches real current-season club
+  squads from Wikipedia (see **Club squads** below — this one you likely need
+  to run yourself).
+- `public/data/` — the normalized dataset the app reads at runtime:
+  `index.json` + `matches/*.json` for historical matches, `squads/*.json` for
+  current club squads.
 
 ## The historical data — and its real limits
 
@@ -77,6 +90,45 @@ or Opta is the realistic path. The app's data layer (`src/data/loadDataset.ts`,
 `src/data/types.ts`) is deliberately provider-agnostic — a new fetcher script
 that writes the same `NormalizedMatch` JSON shape into `public/data/` plugs
 straight into the existing UI with no frontend changes.
+
+## Club squads (current season) — separate from historical matches
+
+The **Club Squads** tab is deliberately separate from **Historical matches**:
+it loads a club's actual, current first-team squad (real shirt numbers, real
+players, real manager) rather than a specific match's real lineup. There is
+no free source for a *confirmed starting XI* for a future/ongoing match — no
+site publishes that as structured data, it's punditry that changes daily —
+so instead the pitch is auto-filled (goalkeeper first, then the rest of the
+squad in list order) as a starting point, and you drag/swap players from the
+bench to set up whatever XI and formation you actually think is right.
+
+**`public/data/squads/` ships empty.** The fetch script
+(`data-pipeline/fetch_current_squads.py`) pulls real squads from Wikipedia's
+"Current squad" section (shirt number, name, broad position, manager) for a
+short list of clubs defined in the script — but it could not be run or
+tested from the environment this app was built in, because that sandbox's
+network policy blocks Wikipedia (and every other sports site) entirely, for
+both plain HTTP requests and the AI web-fetch tool. Run it yourself:
+
+```bash
+cd data-pipeline
+pip install requests
+python3 fetch_current_squads.py
+```
+
+Check the first club's output JSON against its Wikipedia page before
+trusting the rest — Wikipedia's squad-table formatting is consistent for
+most clubs (it targets the standard `{{fs player}}` template) but isn't
+100% uniform, and the script skips (rather than guesses at) any club whose
+page doesn't parse. Add more clubs by editing the `CLUBS` list at the top of
+the script, or fetch one ad hoc:
+
+```bash
+python3 fetch_current_squads.py --club "Liverpool F.C." --display-name "Liverpool" --league "Premier League"
+```
+
+Squads go stale — re-run the script periodically; each squad file records
+`fetchedAt` so you can tell how current it is.
 
 ## Formation positions
 

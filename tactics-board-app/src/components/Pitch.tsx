@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { useBoardStore } from "../state/boardStore";
 import PlayerToken from "./PlayerToken";
@@ -19,23 +19,42 @@ export default function Pitch() {
     const rect = containerRef.current!.getBoundingClientRect();
     const x = ((clientX - rect.left) / rect.width) * 100;
     const y = ((clientY - rect.top) / rect.height) * 100;
-    return { x, y };
+    // Clamp against the pitch bounds, not the pointer -- a fast drag can carry the
+    // pointer well outside the pitch element, but the token should still slide up
+    // to the edge and stay there instead of the drag "letting go".
+    return { x: Math.min(100, Math.max(0, x)), y: Math.min(100, Math.max(0, y)) };
   }
 
-  function handlePointerDown(id: string) {
+  // Global (window-level) listeners while a drag is active: a pointer that moves
+  // fast enough to briefly leave the pitch element (very easy with a mouse/trackpad
+  // flick) used to fire pointerleave on the container and abort the drag even
+  // though the button was never released. Tracking the drag on window instead means
+  // only an actual pointerup ends it, and the token still follows the cursor
+  // wherever it goes (clamped to the pitch edges above).
+  useEffect(() => {
+    function handleMove(e: PointerEvent) {
+      if (!draggingId.current) return;
+      didDrag.current = true;
+      const { x, y } = toPercent(e.clientX, e.clientY);
+      moveToken(draggingId.current, x, y);
+    }
+    function handleUp() {
+      draggingId.current = null;
+    }
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointercancel", handleUp);
+    return () => {
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointercancel", handleUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moveToken]);
+
+  function handleTokenPointerDown(id: string) {
     draggingId.current = id;
     didDrag.current = false;
-  }
-
-  function handlePointerMove(e: ReactPointerEvent<HTMLDivElement>) {
-    if (!draggingId.current) return;
-    didDrag.current = true;
-    const { x, y } = toPercent(e.clientX, e.clientY);
-    moveToken(draggingId.current, x, y);
-  }
-
-  function endDrag() {
-    draggingId.current = null;
   }
 
   function handleClick(e: ReactPointerEvent<HTMLDivElement>) {
@@ -49,14 +68,11 @@ export default function Pitch() {
     <div
       ref={containerRef}
       className={`pitch${addTokenSide ? " pitch-add-mode" : ""}`}
-      onPointerMove={handlePointerMove}
-      onPointerUp={endDrag}
-      onPointerLeave={endDrag}
       onClick={handleClick}
     >
       <PitchMarkings />
       {tokens.map((t) => (
-        <PlayerToken key={t.id} token={t} onPointerDown={() => handlePointerDown(t.id)} />
+        <PlayerToken key={t.id} token={t} onPointerDown={() => handleTokenPointerDown(t.id)} />
       ))}
     </div>
   );

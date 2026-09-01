@@ -241,6 +241,8 @@ def normalize_match(match_summary: dict) -> dict | None:
         "away_team": {"id": away["away_team_id"], "name": away["away_team_name"]},
         "home_score": match_summary.get("home_score"),
         "away_score": match_summary.get("away_score"),
+        "home_manager": (home.get("managers") or [{}])[0].get("name"),
+        "away_manager": (away.get("managers") or [{}])[0].get("name"),
         "formations": {str(tid): f for tid, f in formations.items()},
         "squads": {str(tid): squad for tid, squad in squads.items()},
         "events": notable,

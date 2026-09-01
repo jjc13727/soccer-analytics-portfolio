@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { computePlayerStats, computeScoreline, useBoardStore } from "../state/boardStore";
 import { formationCodeToLabel } from "../data/positions";
+import TeamBadge from "./TeamBadge";
 
 export default function StatsSidebar() {
   const match = useBoardStore((s) => s.match);
@@ -71,7 +72,7 @@ function TeamHeader({
 }) {
   return (
     <div className={`team-header ${align}`}>
-      <div className="team-dot" style={{ background: color }} />
+      <TeamBadge name={name} color={color} />
       <div>
         <div className="team-name">{name}</div>
         {formation && <div className="team-formation">{formationCodeToLabel(formation)}</div>}

@@ -80,6 +80,8 @@ export interface NormalizedMatch {
   away_team: TeamRef;
   home_score: number;
   away_score: number;
+  home_manager: string | null;
+  away_manager: string | null;
   formations: Record<string, FormationInfo>;
   squads: Record<string, SquadPlayer[]>;
   events: MatchEvent[];
@@ -135,4 +137,36 @@ export interface TeamMeta {
   name: string;
   color: string;
   formationCode: string | null;
+}
+
+// --- Current-season club squads (separate feature from historical match data) -----
+
+export type BroadPosition = "GK" | "DF" | "MF" | "FW";
+
+export interface ClubSquadPlayer {
+  number: number | null;
+  name: string;
+  nickname?: string | null;
+  position: BroadPosition;
+}
+
+export interface ClubSquad {
+  club: string;
+  league: string;
+  seasonLabel: string; // e.g. "2025-26" -- whatever season the source data reflects
+  manager: string | null;
+  source: string; // URL or description of where this was pulled from
+  fetchedAt: string; // ISO date the data was pulled -- squads change, so age matters
+  players: ClubSquadPlayer[];
+}
+
+export interface ClubSquadIndexEntry {
+  slug: string;
+  club: string;
+  league: string;
+}
+
+export interface ClubSquadIndex {
+  generated_at: string;
+  clubs: ClubSquadIndexEntry[];
 }

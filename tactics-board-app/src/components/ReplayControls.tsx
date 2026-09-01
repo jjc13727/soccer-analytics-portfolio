@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useBoardStore } from "../state/boardStore";
+import { getNickname, useBoardStore } from "../state/boardStore";
+import { shortDisplayName } from "../data/nameFormat";
 
 export default function ReplayControls() {
   const match = useBoardStore((s) => s.match);
@@ -78,14 +79,19 @@ export default function ReplayControls() {
 
 function describeEvent(e: import("../data/types").MatchEvent, match: import("../data/types").NormalizedMatch): string {
   const teamName = e.team_id === match.home_team.id ? match.home_team.name : match.away_team.name;
+  const name = (id: number, fullName: string) => shortDisplayName(fullName, getNickname(match, id));
   switch (e.type) {
     case "goal":
-      return `⚽ Goal — ${e.player_name} (${teamName})${e.assist_player_name ? ` assist: ${e.assist_player_name}` : ""}`;
+      return `⚽ Goal — ${name(e.player_id, e.player_name)} (${teamName})${
+        e.assist_player_id && e.assist_player_name ? ` assist: ${name(e.assist_player_id, e.assist_player_name)}` : ""
+      }`;
     case "own_goal":
-      return `⚽ Own goal — ${e.player_name} (credited to ${teamName})`;
+      return `⚽ Own goal — ${name(e.player_id, e.player_name)} (credited to ${teamName})`;
     case "card":
-      return `${e.card === "Red Card" ? "🟥" : "🟨"} ${e.card} — ${e.player_name} (${teamName})`;
-    case "sub":
-      return `🔄 Substitution — ${e.player_on_name ?? "?"} on for ${e.player_off_name} (${teamName})`;
+      return `${e.card === "Red Card" ? "🟥" : "🟨"} ${e.card} — ${name(e.player_id, e.player_name)} (${teamName})`;
+    case "sub": {
+      const onName = e.player_on_id && e.player_on_name ? name(e.player_on_id, e.player_on_name) : (e.player_on_name ?? "?");
+      return `🔄 Substitution — ${onName} on for ${name(e.player_off_id, e.player_off_name)} (${teamName})`;
+    }
   }
 }
